@@ -3,7 +3,7 @@ import MainSection from "@/modules/home/ui/components/home-sidebar/main-section"
 import {Separator} from "@/components/ui/separator";
 import PersonalSection from "@/modules/home/ui/components/home-sidebar/personal-section";
 
-const HomeSideBar = () => {
+const StudioNavbar = () => {
     return (
         <Sidebar className='pt-16 z-40 border-none' collapsible='icon'>
             <SidebarContent className='bg-background'>
@@ -14,4 +14,4 @@ const HomeSideBar = () => {
         </Sidebar>
     )
 }
-export default HomeSideBar
+export default StudioNavbar
