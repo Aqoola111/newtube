@@ -1,7 +1,7 @@
 import {SidebarTrigger} from "@/components/ui/sidebar";
 import Link from "next/link";
 import {Logo} from "@/components/Logo";
-import SearchInput from "@/modules/ui/components/home-navbar/search-input";
+import SearchInput from "@/modules/home/ui/components/home-navbar/search-input";
 import AuthButton from "@/modules/auth/ui/components/auth-button";
 
 const HomeNavbar = () => {
@@ -10,7 +10,7 @@ const HomeNavbar = () => {
             <div className='flex items-center gap-4 w-full'>
                 <div className='flex items-center flex-shrink-0'>
                     <SidebarTrigger/>
-                    <Link href={"/"}>
+                    <Link href={"/public"}>
                         <Logo/>
                     </Link>
                 </div>

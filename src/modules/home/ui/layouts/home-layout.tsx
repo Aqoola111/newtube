@@ -1,6 +1,6 @@
 import {SidebarProvider} from "@/components/ui/sidebar";
-import HomeNavbar from "@/modules/ui/components/home-navbar";
-import HomeSideBar from "@/modules/ui/components/home-sidebar";
+import HomeNavbar from "@/modules/home/ui/components/home-navbar";
+import HomeSideBar from "@/modules/home/ui/components/home-sidebar";
 
 export const HomeLayout = ({
                                children,

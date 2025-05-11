@@ -9,6 +9,7 @@ import {
     SidebarMenuItem
 } from "@/components/ui/sidebar";
 import Link from "next/link";
+import {useAuth, useClerk} from "@clerk/nextjs";
 
 const items = [
     {
@@ -32,6 +33,9 @@ const items = [
 ]
 
 const PersonalSection = () => {
+    const clerk = useClerk();
+    const {isSignedIn} = useAuth()
+
     return (
         <SidebarGroup>
             <SidebarGroupContent>
@@ -47,7 +51,11 @@ const PersonalSection = () => {
                                     <SidebarMenuButton
                                         asChild
                                         isActive={false}
-                                        onClick={() => {
+                                        onClick={(e) => {
+                                            if (!isSignedIn && item.auth) {
+                                                e.preventDefault()
+                                                return clerk.openSignIn();
+                                            }
                                         }}
                                         tooltip={item.title}
                                     >
