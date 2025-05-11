@@ -1,10 +1,11 @@
-import {Logo} from "@/components/Logo";
+import {trpc} from "@/trpc/server";
 
-export default function Home() {
+export default async function Home() {
+    const data = await trpc.hello({text: "hello"});
+
     return (
         <div>
-            Home
-
+            client says: {data?.greeting}
         </div>
     );
 }
