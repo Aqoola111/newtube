@@ -5,7 +5,7 @@ interface LogoProps {
 }
 
 export function Logo({label}: LogoProps) {
-    return <div className="flex p-4 gap-2 items-center">
+    return <div className="md:flex hidden  p-4 gap-2 items-center">
         <Image height={"32"} width={"32"} src={"/logo.svg"} alt={"Logo"}/>
         <h1 className="text-2xl tracking-tight font-semibold">
             {label ? label : 'NewTube'}
