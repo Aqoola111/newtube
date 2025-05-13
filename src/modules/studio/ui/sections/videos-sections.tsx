@@ -1,7 +1,7 @@
 'use client'
 import {trpc} from "@/trpc/client";
 import {DEFAULT_LIMIT} from "@/constants";
-import {Suspense} from "react";
+import {Suspense, useState} from "react";
 import {ErrorBoundary} from "react-error-boundary";
 import {InfiniteScroll} from "@/components/infinite-scroll";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
@@ -9,6 +9,10 @@ import {useRouter} from "next/navigation";
 import VideoThumbnail from "@/modules/videos/components/ui/video-thumbnail";
 import {Badge} from "@/components/ui/badge";
 import {format} from "date-fns";
+import {Loader, LockIcon, UnlockIcon} from "lucide-react";
+import {Button} from "@/components/ui/button";
+import {toast} from "sonner";
+import {cn} from "@/lib/utils";
 
 export const VideosSections = () => {
     return (
@@ -50,6 +54,24 @@ const VideosSectionsSuspense = () => {
     const [videos, query] = trpc.studio.getMany.useSuspenseInfiniteQuery({limit: DEFAULT_LIMIT}, {
         getNextPageParam: (lastPage) => lastPage.nextCursor
     })
+    const utils = trpc.useUtils()
+    const [updatingId, setUpdatingId] = useState<string | null>(null)
+
+    const {mutate: updateVideo, status: mutationStatus} = trpc.videos.update.useMutation({
+        onSuccess: () => {
+            utils.studio.getMany.invalidate()
+            toast('Video updated successfully')
+            setUpdatingId(null)
+        },
+        onError(error) {
+            toast.error(error.message)
+            setUpdatingId(null)
+        },
+        onMutate: (vars) => {
+            setUpdatingId(vars.id)
+        }
+    })
+
     const router = useRouter()
     return (
         <div>
@@ -71,15 +93,24 @@ const VideosSectionsSuspense = () => {
                             const status = video.muxStatus as keyof typeof statusMap;
                             const badge = statusMap[status] ?? statusMap["errored"];
 
+                            const handlePrivateChange = (e: React.MouseEvent<HTMLButtonElement>) => {
+                                e.preventDefault()
+                                updateVideo({
+                                    id: video.id,
+                                    visibility: video.visibility === 'private' ? 'public' : 'private'
+                                })
+                            }
+
                             return (
                                 <TableRow
                                     key={video.id}
-                                    onClick={() => router.push(`/studio/videos/${video.id}`)}
-                                    className="cursor-pointer"
+                                    // onClick={() => router.push(`/studio/videos/${video.id}`)}
+                                    className="cursor-pointer hover:bg-accent transition-all duration-300"
                                 >
                                     <TableCell>
-                                        <div className="flex items-center gap-4">
-                                            <div className="relative aspect-video w-36 shrink-0">
+                                        <div className="flex items-center  gap-4 w-full pl-5">
+                                            <div
+                                                className="relative aspect-video  z-50 w-40 rounded-xl shadow-xl  shrink-0">
                                                 <VideoThumbnail
                                                     previewUrl={video.previewUrl}
                                                     duration={video.duration}
@@ -88,7 +119,48 @@ const VideosSectionsSuspense = () => {
                                             </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell>visibility</TableCell>
+                                    <TableCell>
+                                        {
+                                            <div className='flex items-center gap-2'>
+                                                {
+                                                    <Button onClick={(e) => handlePrivateChange(e)}
+                                                            variant='outline'
+                                                            className='group hover:bg-accent hover:scale-105'>
+
+                                                        <h1 className='text-sm font-semibold'>
+                                                            {video.visibility}
+                                                        </h1>
+                                                        {
+                                                            mutationStatus !== "success" && updatingId === video.id
+                                                                ? <Loader size={16} className='animate-spin'/> :
+                                                                <>
+                                                                    <UnlockIcon
+                                                                        size={16}
+                                                                        className={cn(
+                                                                            "transition-all duration-300",
+                                                                            video.visibility === "public"
+                                                                                ? "inline-flex group-hover:hidden"
+                                                                                : "hidden group-hover:inline-flex"
+                                                                        )}
+                                                                    />
+
+                                                                    <LockIcon
+                                                                        size={16}
+                                                                        className={cn(
+                                                                            "transition-all duration-300",
+                                                                            video.visibility === "private"
+                                                                                ? "inline-flex group-hover:hidden"
+                                                                                : "hidden group-hover:inline-flex"
+                                                                        )}
+                                                                    />
+
+                                                                </>
+                                                        }
+                                                    </Button>
+                                                }
+                                            </div>
+                                        }
+                                    </TableCell>
                                     <TableCell>
                                         <Badge variant='outline' className='truncate'>
                                             {format(new Date(video.createdAt), ('d MMM yyyy'))}
@@ -103,7 +175,8 @@ const VideosSectionsSuspense = () => {
                                     <TableCell>comments</TableCell>
                                     <TableCell>likes</TableCell>
                                 </TableRow>
-                            );
+                            )
+                                ;
                         })}
                     </TableBody>
                 </Table>

@@ -8,7 +8,6 @@ interface VideoThumbnailProps {
 }
 
 const VideoThumbnail = ({thumbnailUrl, previewUrl, duration = 0}: VideoThumbnailProps) => {
-    console.log(previewUrl)
     return (
         <div className='relative'>
             <div className='relative w-full overflow-hidden group rounded-xl aspect-video'>
@@ -18,7 +17,7 @@ const VideoThumbnail = ({thumbnailUrl, previewUrl, duration = 0}: VideoThumbnail
                     previewUrl && <Image src={previewUrl} alt={'Preview'} fill
                                          className='size-full  group-hover:z-10 object-cover'/>
                 }
-                <div className='absolute z-10 bottom-2 right-2 p-0.5 px-2 text-xs text-white rounded bg-black/80'>
+                <div className='absolute z-10 bottom-2 right-2 p-0.5 px-2 text-xs text-white rounded-xl bg-black/80'>
                     {!duration ? '0:00' : formatDuration(duration)}
                 </div>
             </div>
