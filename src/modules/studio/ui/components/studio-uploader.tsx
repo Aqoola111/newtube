@@ -41,7 +41,8 @@ const StudioUploader = ({endpoint, onSuccess}: studioUploaderProps) => {
                     </MuxUploaderFileSelect>
                 </div>
                 <span slot={'separator'} className='hidden'/>
-                <MuxUploaderStatus muxUploader={UPLOADER_ID} className={'text-sm'}/>
+
+                <MuxUploaderStatus muxUploader={UPLOADER_ID} className={'text-sm py-10'}/>
                 <MuxUploaderProgress
                     muxUploader={UPLOADER_ID}
                     className='text-sm'
@@ -51,6 +52,7 @@ const StudioUploader = ({endpoint, onSuccess}: studioUploaderProps) => {
                     muxUploader={UPLOADER_ID}
                     type='bar'
                 />
+
             </MuxUploaderDrop>
         </div>
     )

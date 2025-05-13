@@ -1,4 +1,4 @@
-import {pgTable, text, timestamp, uniqueIndex, uuid} from "drizzle-orm/pg-core";
+import {integer, pgTable, text, timestamp, uniqueIndex, uuid} from "drizzle-orm/pg-core";
 import {relations} from 'drizzle-orm'
 
 export const users = pgTable("users", {
@@ -37,6 +37,9 @@ export const videos = pgTable("videos", {
     categoryId: uuid("category_id").references(() => categories.id, {
         onDelete: "set null",
     }),
+    thumbnailUrl: text("thumbnail_url"),
+    previewUrl: text("preview_url"),
+    duration: integer("duration"),
     muxStatus: text("mux_status"),
     muxAssetId: text("mux_asset_id").unique(),
     muxUploadId: text("mux_upload_id").unique(),

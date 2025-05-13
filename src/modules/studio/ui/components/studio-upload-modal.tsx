@@ -22,7 +22,8 @@ const StudioUploadModal = () => {
             <ResponsiveModal isOpen={!!create.data?.url} onOpenChange={() => {
                 create.reset()
             }} title={'Upload Video'} description={'Upload a new video to your channel'}>
-                {create.data?.url ? <StudioUploader onSuccess={() => {
+                {create.data?.url ?
+                    <StudioUploader onSuccess={() => {
                     }} endpoint={create.data.url}/> :
                     <div className='flex justify-center items-center h-full'>
                         <Loader2Icon className='animate-spin text-muted-foreground'/>
