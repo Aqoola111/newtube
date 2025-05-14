@@ -14,7 +14,7 @@ const VideoThumbnail = ({thumbnailUrl, previewUrl, duration = 0}: VideoThumbnail
                 <Image src={thumbnailUrl ? thumbnailUrl : '/placeholder.svg'} alt={'thumbnail'} fill
                        className='size-full z-5 object-cover'/>
                 {
-                    previewUrl && <Image src={previewUrl} alt={'Preview'} fill
+                    previewUrl && <Image src={previewUrl} unoptimized={!!previewUrl} alt={'Preview'} fill
                                          className='size-full  group-hover:z-10 object-cover'/>
                 }
                 <div className='absolute z-10 bottom-2 right-2 p-0.5 px-2 text-xs text-white rounded-xl bg-black/80'>

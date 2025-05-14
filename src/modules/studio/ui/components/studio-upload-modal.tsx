@@ -5,6 +5,7 @@ import {trpc} from "@/trpc/client";
 import {toast} from "sonner";
 import ResponsiveModal from "@/components/responsive-modal";
 import StudioUploader from "@/modules/studio/ui/components/studio-uploader";
+import {useRouter} from "next/navigation";
 
 const StudioUploadModal = () => {
     const utils = trpc.useUtils()
@@ -17,14 +18,22 @@ const StudioUploadModal = () => {
             toast.error(Error.message)
         }
     })
+
+    const router = useRouter()
+
+    const onSuccess = () => {
+        if (!create.data?.video.id) return;
+
+        create.reset()
+        router.push(`/studio/videos/${create.data.video.id}`)
+    }
     return (
         <>
             <ResponsiveModal isOpen={!!create.data?.url} onOpenChange={() => {
                 create.reset()
             }} title={'Upload Video'} description={'Upload a new video to your channel'}>
                 {create.data?.url ?
-                    <StudioUploader onSuccess={() => {
-                    }} endpoint={create.data.url}/> :
+                    <StudioUploader onSuccess={() => onSuccess()} endpoint={create.data.url}/> :
                     <div className='flex justify-center items-center h-full'>
                         <Loader2Icon className='animate-spin text-muted-foreground'/>
                     </div>}

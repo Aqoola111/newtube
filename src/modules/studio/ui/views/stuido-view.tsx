@@ -1,4 +1,4 @@
-import {VideosSections} from "@/modules/studio/ui/sections/videos-sections";
+import {VideosSection} from "@/modules/studio/ui/sections/videos-section";
 
 export const StuidoView = () => {
     return (
@@ -7,7 +7,7 @@ export const StuidoView = () => {
                 <h1 className='text-2xl font-bold'>Channel</h1>
                 <p className='text-muted-foreground text-sm'>Manage your videos</p>
             </div>
-            <VideosSections/>
+            <VideosSection/>
         </div>
     )
 }

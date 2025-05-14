@@ -50,6 +50,8 @@ export const POST = async (request: Request) => {
                 return new Response('No mux video upload id found', {status: 400})
             }
 
+            console.log(`Creating video: ${data.upload_id}`)
+
             await db.update(videos).set({
                 muxAssetId: data.id,
                 muxStatus: data.status,
@@ -57,6 +59,7 @@ export const POST = async (request: Request) => {
             }).where(eq(videos.muxUploadId, data.upload_id))
             break;
         }
+
         case "video.asset.ready" : {
             const data = payload.data as VideoAssetReadyWebhookEvent['data']
             const playbackId = data.playback_ids?.[0]?.id
@@ -98,13 +101,45 @@ export const POST = async (request: Request) => {
 
             break
         }
+
         case "video.asset.deleted": {
             const data = payload.data as VideoAssetDeletedWebhookEvent['data']
 
+            if (!data.upload_id) {
+                return new Response('No mux video upload id found', {status: 400})
+            }
+
+            console.log(`Deleting video: ${data.upload_id}`)
+
+            await db.delete(videos).where(eq(videos.muxUploadId, data.upload_id))
+
+            break;
         }
 
-        // case "video.asset.track.ready" : {
-        // }
+        case "video.asset.track.ready" : {
+            const data = payload.data as VideoAssetTrackReadyWebhookEvent['data'] & {
+                asset_id: string
+            }
+
+            //Typescript doesn't know that asset_id is in the data object
+            const assetId = data.asset_id;
+
+
+            if (!assetId) {
+                return new Response('No mux video upload id found', {status: 400})
+            }
+
+            console.log(`Updating video track: ${assetId}'s track status to ${data.status}`)
+
+            await db.update(videos).set({
+                muxTrackId: data.id,
+                muxTrackStatus: data.status,
+            }).where(eq(videos.muxAssetId, assetId))
+
+
+            break;
+        }
+
     }
 
 

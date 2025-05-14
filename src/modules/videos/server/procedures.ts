@@ -1,8 +1,9 @@
 import {createTRPCRouter, protectedProcedure} from "@/trpc/init";
-import {videos} from "@/db/schema";
+import {videos, videoUpdateSchema} from "@/db/schema";
 import {db} from "@/db";
 import {mux} from "@/lib/mux";
-import {eq} from "drizzle-orm";
+import {and, eq} from "drizzle-orm";
+import {TRPCError} from "@trpc/server";
 import {z} from "zod";
 
 export const videosRouter = createTRPCRouter({
@@ -12,13 +13,23 @@ export const videosRouter = createTRPCRouter({
         const upload = await mux.video.uploads.create({
             new_asset_settings: {
                 passthrough: userId,
-                playback_policies: ["public"]
+                playback_policies: ["public"],
+                inputs: [
+                    {
+                        generated_subtitles: [
+                            {
+                                language_code: "en",
+                                name: "English"
+                            }
+                        ]
+                    }
+                ]
             },
             cors_origin: "*"
         })
 
 
-        const video = await db
+        const [video] = await db
             .insert(videos).values({
                 userId,
                 title: `Untitled - ${Math.floor(Math.random() * 10000)}`,
@@ -33,26 +44,52 @@ export const videosRouter = createTRPCRouter({
     }),
     update: protectedProcedure
         .input(
-            z.object({
-                id: z.string().uuid(),
-                title: z.string().min(1).max(100).optional(),
-                description: z.string().optional(),
-                visibility: z.enum(['public', 'private']).optional(),
-            })
+            videoUpdateSchema
         )
         .mutation(async ({ctx, input}) => {
+
                 const {id: userId} = ctx.user
 
-                if (!userId) throw new Error("User not found")
+                if (!userId) throw new TRPCError({message: "User not found", code: "NOT_FOUND"})
 
-                const updatedVideo = await db.update(videos).set({
+                if (!input.id) throw new TRPCError({message: "Video ID not found", code: "NOT_FOUND"})
+
+
+                const [updatedVideo] = await db.update(videos).set({
                     title: input.title,
                     description: input.description,
+                    categoryId: input.categoryId,
+                    updatedAt: new Date(),
                     visibility: input.visibility,
-                }).where(eq(videos.id, input.id)).returning()
+                }).where(and((eq(videos.id, input.id), eq(videos.userId, userId)))).returning()
+
+                if (!updatedVideo) throw new TRPCError({message: "Video not found", code: "NOT_FOUND"})
 
                 return updatedVideo
             }
+        ),
+    delete: protectedProcedure
+        .input(
+            z.object({
+                video_id: z.string().uuid(),
+            })
         )
+        .mutation(async ({ctx, input}) => {
+            const {id: userId} = ctx.user
 
+            if (!userId) throw new TRPCError({message: "User not found", code: "NOT_FOUND"})
+
+            const [video] = await db.delete(videos).where(and(
+                eq(videos.id, input.video_id),
+                eq(videos.userId, userId)
+            )).returning()
+
+            console.log(`Deleting video: ${video?.muxAssetId}`)
+
+            mux.video.assets.delete(video.muxAssetId || "")
+
+            if (!video) throw new TRPCError({message: "Video not found", code: "NOT_FOUND"})
+
+            return video
+        })
 })

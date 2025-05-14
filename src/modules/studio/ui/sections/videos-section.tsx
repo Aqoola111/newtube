@@ -5,18 +5,20 @@ import {Suspense, useState} from "react";
 import {ErrorBoundary} from "react-error-boundary";
 import {InfiniteScroll} from "@/components/infinite-scroll";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {useRouter} from "next/navigation";
 import VideoThumbnail from "@/modules/videos/components/ui/video-thumbnail";
 import {Badge} from "@/components/ui/badge";
 import {format} from "date-fns";
-import {Loader, LockIcon, UnlockIcon} from "lucide-react";
+import {Edit, Loader, LockIcon, Trash, UnlockIcon} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {toast} from "sonner";
 import {cn} from "@/lib/utils";
+import {VideoSectionSkeleton} from "@/modules/studio/ui/sections/videos-section-skeleton";
+import {statusMap} from "../../constants";
+import {useRouter} from "next/navigation";
 
-export const VideosSections = () => {
+export const VideosSection = () => {
     return (
-        <Suspense fallback={<p>Loading</p>}>
+        <Suspense fallback={<VideoSectionSkeleton/>}>
             <ErrorBoundary fallback={<p>Error</p>}>
                 <VideosSectionsSuspense/>
             </ErrorBoundary>
@@ -24,31 +26,6 @@ export const VideosSections = () => {
     )
 }
 
-const statusMap: Record<
-    "preparing" | "ready" | "errored" | "waiting",
-    { label: string; className: string; variant?: "default" | "outline" | "destructive" }
-> = {
-    preparing: {
-        label: "Preparing",
-        variant: "outline",
-        className: "text-yellow-600 border-yellow-600",
-    },
-    ready: {
-        label: "Ready",
-        variant: "default",
-        className: "bg-green-600 hover:bg-green-700",
-    },
-    errored: {
-        label: "Error",
-        variant: "destructive",
-        className: "",
-    },
-    waiting: {
-        label: "Waiting",
-        variant: "outline",
-        className: "text-yellow-600 border-yellow-600",
-    },
-}
 
 const VideosSectionsSuspense = () => {
     const [videos, query] = trpc.studio.getMany.useSuspenseInfiniteQuery({limit: DEFAULT_LIMIT}, {
@@ -56,6 +33,7 @@ const VideosSectionsSuspense = () => {
     })
     const utils = trpc.useUtils()
     const [updatingId, setUpdatingId] = useState<string | null>(null)
+    const router = useRouter()
 
     const {mutate: updateVideo, status: mutationStatus} = trpc.videos.update.useMutation({
         onSuccess: () => {
@@ -68,11 +46,21 @@ const VideosSectionsSuspense = () => {
             setUpdatingId(null)
         },
         onMutate: (vars) => {
-            setUpdatingId(vars.id)
+            setUpdatingId(vars.id || null)
         }
     })
 
-    const router = useRouter()
+    const {mutate: deleteVideo} = trpc.videos.delete.useMutation({
+        onSuccess: () => {
+            utils.studio.getMany.invalidate()
+            router.push('/studio')
+            toast.success('Video deleted successfully')
+        },
+        onError(error) {
+            toast.error(error.message)
+        },
+    })
+
     return (
         <div>
             <div className='border-y'>
@@ -104,8 +92,7 @@ const VideosSectionsSuspense = () => {
                             return (
                                 <TableRow
                                     key={video.id}
-                                    // onClick={() => router.push(`/studio/videos/${video.id}`)}
-                                    className="cursor-pointer hover:bg-accent transition-all duration-300"
+                                    className="transition-all duration-300"
                                 >
                                     <TableCell>
                                         <div className="flex items-center  gap-4 w-full pl-5">
@@ -174,6 +161,19 @@ const VideosSectionsSuspense = () => {
                                     <TableCell>views</TableCell>
                                     <TableCell>comments</TableCell>
                                     <TableCell>likes</TableCell>
+                                    <TableCell>
+                                        <Button variant='outline' className='mr-2'
+                                                onClick={() => router.push(`/studio/videos/${video.id}`)}>
+                                            <Edit size={16}/>
+                                        </Button>
+                                        <Button onClick={() => deleteVideo({video_id: video.id})} variant='destructive'
+                                                className='bg-white text-destructive hover:text-white border-destructive border'>
+                                            <Trash size={16}/>
+                                        </Button>
+                                    </TableCell>
+                                    <TableCell>
+
+                                    </TableCell>
                                 </TableRow>
                             )
                                 ;
