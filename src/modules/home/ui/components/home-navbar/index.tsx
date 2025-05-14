@@ -10,7 +10,7 @@ const HomeNavbar = () => {
             <div className='flex items-center gap-4 w-full'>
                 <div className='flex items-center flex-shrink-0'>
                     <SidebarTrigger/>
-                    <Link href={"/public"}>
+                    <Link href={"/"}>
                         <Logo/>
                     </Link>
                 </div>

@@ -251,7 +251,7 @@ const FormSectionSuspense = ({videoId}: FormSectionProps) => {
                                                             <ImagePlayIcon className={'size-4'}/>
                                                             Change
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem className='gap-2'>
+                                                        <DropdownMenuItem disabled={true} className='gap-2'>
                                                             <Sparkles className={'size-4'}/>
                                                             Ai-generated
                                                         </DropdownMenuItem>
