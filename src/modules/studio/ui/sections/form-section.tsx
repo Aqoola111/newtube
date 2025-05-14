@@ -5,7 +5,17 @@ import {Suspense, useState} from "react";
 import {ErrorBoundary} from "react-error-boundary";
 import {Button} from "@/components/ui/button";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
-import {CopyCheckIcon, CopyIcon, Lock, MoreVerticalIcon, TrashIcon, UnlockIcon} from "lucide-react";
+import {
+    CopyCheckIcon,
+    CopyIcon,
+    ImagePlayIcon,
+    Lock,
+    MoreVerticalIcon,
+    RotateCcw,
+    Sparkles,
+    TrashIcon,
+    UnlockIcon
+} from "lucide-react";
 import {useForm} from "react-hook-form";
 import {z} from "zod";
 import {videoUpdateSchema} from "@/db/schema";
@@ -19,6 +29,7 @@ import VideoPlayer from "@/modules/videos/components/ui/video-player";
 import Link from "next/link";
 import Image from "next/image";
 import {useRouter} from "next/navigation";
+import {THUMBNAIL_FALLBACK} from "@/modules/studio/constants";
 
 
 interface FormSectionProps {
@@ -194,10 +205,48 @@ const FormSectionSuspense = ({videoId}: FormSectionProps) => {
                                 </FormItem>
                             )}
                         />
-                        <div className={'relative  overflow-hidden rounded-xl bg-gray-200 aspect-video w-[320px]'}>
-                            <Image src={video.thumbnailUrl || '/placeholder.svg'} alt='thumbnail' fill
-                                   className='object-cover'/>
-                        </div>
+                        <FormField
+                            control={form.control}
+                            name='thumbnailUrl'
+                            render={({field}) => (
+                                <FormItem>
+                                    <FormLabel>
+                                        Thumbnail
+                                    </FormLabel>
+                                    <FormControl>
+                                        <div
+                                            className='p-0.5 border border-dashed border-neutral-400 relative h-[84px] w-[153px] group'>
+                                            <Image src={video.thumbnailUrl || THUMBNAIL_FALLBACK} alt='thumbnail' fill
+                                                   className='object-cover'/>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button type='button' size='icon'
+                                                            className='bg-black/50 hover:bg-black absolute top-1 right-1 rounded-full md:opacity-0 opacity-100 duration-300 size-7 group-hover:opacity-100'>
+                                                        <MoreVerticalIcon/>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align={'start'} side={'right'}>
+                                                    <DropdownMenuItem className='gap-2'>
+                                                        <ImagePlayIcon className={'size-4'}/>
+                                                        Change
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem className='gap-2'>
+                                                        <Sparkles className={'size-4'}/>
+                                                        Ai-generated
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem className='gap-2'>
+                                                        <RotateCcw className={'size-4'}/>
+                                                        Restore
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
+
                     </div>
                     <div className='flex flex-col gap-y-8 lg:col-span-2'>
                         <div className='flex flex-col gap-4 bg-gray-200 rounded-xl overflow-hidden h-fit'>

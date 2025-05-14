@@ -23,3 +23,5 @@ export const statusMap: Record<
         className: "text-yellow-600 border-yellow-600",
     },
 }
+
+export const THUMBNAIL_FALLBACK = '/placeholder.svg'
